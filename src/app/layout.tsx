@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import {type ReactNode} from "react"
 import {Providers} from "./provider"
+import Header from "@/components/Header";
 
 export const metadata: Metadata = {
   title: "Tsender",
@@ -13,8 +14,8 @@ export default function RootLayout(props: {children: ReactNode}) {
   return (
     <html lang="en">
       <body>
-        Hi from layout 
         <Providers>
+          <Header/>
           {children}
         </Providers>
       </body>
