@@ -1,0 +1,6 @@
+# Custom Dictionary Words
+Tsender
+rainbowkit
+zksync
+wagmi
+Wagmi
