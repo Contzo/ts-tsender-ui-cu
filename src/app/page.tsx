@@ -1,4 +1,4 @@
-import AirDropForm from "@/components/AirDropForm";
+import AirDropForm from "@/components/ui/AirDropForm";
 import Main from "@/components/Main";
 
 export default function Home() {

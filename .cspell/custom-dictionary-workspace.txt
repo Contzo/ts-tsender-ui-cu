@@ -1,6 +1,7 @@
 # Custom Dictionary Words
-Tsender
 rainbowkit
-zksync
+Tsender
+viem
 wagmi
 Wagmi
+zksync
