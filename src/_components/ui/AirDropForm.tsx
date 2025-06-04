@@ -8,7 +8,7 @@ import { useAccount, useChainId, useConfig } from "wagmi";
 import { chainsToTSender, tsenderAbi, erc20Abi } from "../../app/constants"
 import { getApprovedAmount, splitMultipleInputs } from "@/_utils/helpers";
 import { useMemo } from "react";
-import { calculateTotalAmount } from "@/_utils/calculateTotalAmount";
+import { calculateTotalAmount } from "@/_utils";
 
 type Inputs = {
     tokenAddress: string;
@@ -102,13 +102,16 @@ export default function AirDropForm() {
         const amounts = splitMultipleInputs(value)
 
         if (amounts.length === 0) return "Please an amount of wei to be sent";
+
         for (let index = 0; index < amounts.length; index++) {
-            if (/^\d+e\d+$/i.test(amounts[index])) return 'Only positive integers allowed'
+            // Allow both regular integers and scientific notation
+            if (!/^\d+$|^\d+e\d+$/i.test(amounts[index])) {
+                return 'Only positive integers or scientific notation allowed (e.g., 10 or 1e1)';
+            }
         }
 
         const addresses = splitMultipleInputs(getValues("recipients"))
         if (amounts.length !== addresses.length) return "Each recipient should have its own token amount"
-
 
         return true;
     }
@@ -119,8 +122,8 @@ export default function AirDropForm() {
     return (
         <form className="max-w-2xl w-full lg:mx-auto p-6 flex flex-col gap-6 bg-white rounded-xl ring-[4px] border-2  border-blue-500 ring-blue-500/25" onSubmit={handleSubmit(onSubmit)}>
             <h2 className="text-xl font-semibold text-zinc-900">T-Sender</h2>
-            <FormInputElement label="Token Addres" register={register("tokenAddress", { required: "Token address is required!", validate: (value) => isAddress(value) || "Invalid Ethereum Address" })} error={errors.tokenAddress?.message} placeholder="0x" />
-            <TextAreaElement label="Recipients (comma or new line separated)" placeholder="0x123..., 0x456" error={errors.recipients?.message} register={register("recipients", { required: "At least one reciepient is required", validate: validateReceiverAddresses })} />
+            <FormInputElement label="Token Address" register={register("tokenAddress", { required: "Token address is required!", validate: (value) => isAddress(value) || "Invalid Ethereum Address" })} error={errors.tokenAddress?.message} placeholder="0x" />
+            <TextAreaElement label="Recipients (comma or new line separated)" placeholder="0x123..., 0x456" error={errors.recipients?.message} register={register("recipients", { required: "At least one recipient is required", validate: validateReceiverAddresses })} />
             <TextAreaElement label="Amounts (wei; comma or new line separated)" placeholder="100, 200, 300" error={errors.amounts?.message} register={register("amounts", { required: "At least one amount is required", validate: validateAmounts })} />
             <SendButton disabled={isDisabled} />
         </form>

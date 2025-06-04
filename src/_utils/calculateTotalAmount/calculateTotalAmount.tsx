@@ -1,4 +1,4 @@
-import { splitMultipleInputs } from "./helpers"
+import { splitMultipleInputs } from "../helpers";
 
 export function calculateTotalAmount(amounts: string): bigint {
     if (!amounts) return BigInt(0)
