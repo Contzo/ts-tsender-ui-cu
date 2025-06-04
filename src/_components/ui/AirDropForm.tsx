@@ -103,7 +103,7 @@ export default function AirDropForm() {
 
         if (amounts.length === 0) return "Please an amount of wei to be sent";
         for (let index = 0; index < amounts.length; index++) {
-            if (!/^\d+$/.test(amounts[index])) return 'Only positive integers allowed'
+            if (/^\d+e\d+$/i.test(amounts[index])) return 'Only positive integers allowed'
         }
 
         const addresses = splitMultipleInputs(getValues("recipients"))
