@@ -6,8 +6,9 @@ import TextAreaElement from "./TextAreaElement";
 import SendButton from "./SendButton";
 import { useAccount, useChainId, useConfig } from "wagmi";
 import { chainsToTSender, tsenderAbi, erc20Abi } from "../../app/constants"
-import { getApprovedAmount, splitMultipleInputs } from "@/helpers";
-import { readContract } from "@wagmi/core";
+import { getApprovedAmount, splitMultipleInputs } from "@/_utils/helpers";
+import { useMemo } from "react";
+import { calculateTotalAmount } from "@/_utils/calculateTotalAmount";
 
 type Inputs = {
     tokenAddress: string;
@@ -16,40 +17,20 @@ type Inputs = {
 }
 
 export default function AirDropForm() {
-    const { register, handleSubmit, formState: { errors }, getValues } = useForm<Inputs>();
+    /*//////////////////////////////////////////////////////////////
+                            STATE VARIABLES
+    //////////////////////////////////////////////////////////////*/
+    const { register, handleSubmit, formState: { errors }, getValues, watch } = useForm<Inputs>();
     const chainId = useChainId(); // get the chain Id wagmi hook
     const config = useConfig();
     const connectedAccount = useAccount();
     const isDisabled = Object.keys(errors).length !== 0;
+    const watchedAmounts = watch("amounts"); // subscribe to the amounts changes. 
+    const totalAmount: bigint = useMemo(() => calculateTotalAmount(watchedAmounts), [watchedAmounts])
 
-    // async function getApprovedAmount(
-    //     spenderAddress: `0x${string}`,
-    //     erc20TokenAddress: `0x${string}`,
-    //     ownerAddress: `0x${string}`
-    // ): Promise<bigint> { // Return type should be bigint for uint256
-
-    //     console.log(`Checking allowance for token ${erc20TokenAddress}`);
-    //     console.log(`Owner: ${ownerAddress}`);
-    //     console.log(`Spender: ${spenderAddress}`);
-
-    //     try {
-    //         const allowance = await readContract(config, {
-    //             abi: erc20Abi,
-    //             address: erc20TokenAddress,       // The address of the ERC20 token contract
-    //             functionName: 'allowance',
-    //             args: [ownerAddress, spenderAddress], // Arguments: owner, spender
-    //         });
-
-    //         console.log("Raw allowance response:", allowance);
-    //         // The response from 'allowance' is typically a BigInt
-    //         return allowance as bigint; // Assert type if necessary based on ABI return type
-    //     } catch (error) {
-    //         console.error("Error fetching allowance:", error);
-    //         // Rethrow or handle error appropriately
-    //         throw new Error("Failed to fetch token allowance.");
-    //     }
-    // }
-
+    /*//////////////////////////////////////////////////////////////
+                        EVENTS HANDLERS
+//////////////////////////////////////////////////////////////*/
     async function onSubmit(data: Inputs) {
         const tokenAddress = getValues("tokenAddress");
         const recipients = getValues("recipients");
@@ -96,6 +77,10 @@ export default function AirDropForm() {
             alert("An error occurred. Check the console for details.");
         }
     }
+
+    /*//////////////////////////////////////////////////////////////
+                             AUX FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
     function validateReceiverAddresses(value: string) {
         const addresses = splitMultipleInputs(value);
         if (addresses.length === 0) return "Please enter at least one address";
@@ -127,6 +112,8 @@ export default function AirDropForm() {
 
         return true;
     }
+
+
 
 
     return (
