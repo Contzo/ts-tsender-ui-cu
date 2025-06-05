@@ -4,11 +4,12 @@ import { useForm } from "react-hook-form";
 import { isAddress } from "viem";
 import TextAreaElement from "./TextAreaElement";
 import SendButton from "./SendButton";
-import { useAccount, useChainId, useConfig } from "wagmi";
+import { useAccount, useChainId, useConfig, useWriteContract } from "wagmi";
 import { chainsToTSender, tsenderAbi, erc20Abi } from "../../app/constants"
 import { getApprovedAmount, splitMultipleInputs } from "@/_utils/helpers";
 import { useMemo } from "react";
 import { calculateTotalAmount } from "@/_utils";
+import toast from "react-hot-toast";
 
 type Inputs = {
     tokenAddress: string;
@@ -27,6 +28,7 @@ export default function AirDropForm() {
     const isDisabled = Object.keys(errors).length !== 0;
     const watchedAmounts = watch("amounts"); // subscribe to the amounts changes. 
     const totalAmount: bigint = useMemo(() => calculateTotalAmount(watchedAmounts), [watchedAmounts])
+    const { data: hash, isPending, writeContractAsync } = useWriteContract();
 
     /*//////////////////////////////////////////////////////////////
                         EVENTS HANDLERS
@@ -57,24 +59,55 @@ export default function AirDropForm() {
         // Add validation for recipients and amounts later...
 
         // --- Step 1: Check Allowance ---
-        try {
-            // Using 'as `0x${string}`' for type assertion required by wagmi/viem
-            const approvedAmount = await getApprovedAmount(
-                tSenderAddress as `0x${string}`,
-                tokenAddress as `0x${string}`,
-                connectedAccount.address,
-                erc20Abi,
-                config,
-            );
-            console.log(`Current allowance: ${approvedAmount}`);
+        const approvedAmount = 0;
+        // try {
+        //     approvedAmount = await getApprovedAmount(
+        //         tSenderAddress as `0x${string}`,
+        //         tokenAddress as `0x${string}`,
+        //         connectedAccount.address,
+        //         erc20Abi,
+        //         config,
+        //     );
+        //     console.log(`Current allowance: ${approvedAmount}`);
 
-            // TODO: Compare approvedAmount with the total amount needed for the airdrop
-            // TODO: If allowance is insufficient, call the approve function
-            // TODO: If allowance is sufficient, call the airdrop function on tsender contract
+        //     // TODO: If allowance is insufficient, call the approve function
+        //     // TODO: If allowance is sufficient, call the airdrop function on tsender contract
 
-        } catch (error) {
-            console.error("Error during submission process:", error);
-            alert("An error occurred. Check the console for details.");
+        // } catch (error) {
+        //     console.error("Error during submission process:", error);
+        //     alert("An error occurred. Check the console for details.");
+        // }
+
+        if (totalAmount < approvedAmount) { // update allowance if not enough 
+            console.log(`Approval needed: Current allowance ${approvedAmount}, required: ${totalAmount}`)
+            try {
+
+                const approvalHash = await writeContractAsync({
+                    abi: erc20Abi,
+                    address: tokenAddress as `0x${string}`,
+                    functionName: "approve",
+                    args: [tSenderAddress as `0x${string}`, totalAmount]
+                })
+                console.log("Approval transaction hash:", approvalHash)
+                // ---> Next: wait for confirmation(transaction to be mined)
+                toast.success(`Approval for ${totalAmount} granted`);
+            } catch (error) {
+                console.error("Approval failed:", error)
+                if (
+                    typeof error === 'object' &&
+                    error !== null &&
+                    'shortMessage' in error
+                ) {
+                    toast.error((error as any).shortMessage)
+                } else if (error instanceof Error) {
+                    toast.error(error.message)
+                } else {
+                    toast.error("An unknown error occurred")
+                }
+            }
+        } else {
+            console.log(`Sufficient allowance: ${approvedAmount}`);
+            // ---> Proceed to airdrop logic.
         }
     }
 
