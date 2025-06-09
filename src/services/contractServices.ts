@@ -13,9 +13,11 @@ export class ERC20ContractServices {
     erc20TokenAddress: `0x${string}`,
     ownerAddress: `0x${string}`
   ): Promise<bigint> {
-    console.log(`Checking allowance for token ${erc20TokenAddress}`);
+    console.log("=== CHECKING ALLOWANCE ===");
+    console.log(`Token contract: ${erc20TokenAddress}`);
     console.log(`Owner: ${ownerAddress}`);
     console.log(`Spender: ${spenderAddress}`);
+    console.log(`Config state:`, this.config.state);
 
     try {
       const allowance = await readContract(this.config, {
@@ -26,6 +28,7 @@ export class ERC20ContractServices {
       });
 
       console.log("Raw allowance response:", allowance);
+      console.log("Allowance type:", typeof allowance);
       // The response from 'allowance' is typically a BigInt
       return allowance as bigint; // Assert type if necessary based on ABI return type
     } catch (error) {
@@ -47,13 +50,11 @@ export class ERC20ContractServices {
         args: [spenderAddress, amount],
       });
 
-      toast.success(`Approval for ${amount} tokens granted`);
       return approvalHash;
     } catch (error) {
       console.error("Approval failed:", error);
 
       const errorMessage = this.extractErrorMessage(error);
-      toast.error(errorMessage);
       throw error;
     }
   }

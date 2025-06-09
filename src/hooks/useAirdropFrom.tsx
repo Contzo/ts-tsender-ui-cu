@@ -4,12 +4,12 @@ import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useAccount, useChainId, useConfig, useWriteContract } from "wagmi";
 import toast from "react-hot-toast";
+import { formatEther } from "viem";
 
 import { FormInputs } from "@/types/airdrop";
 import {
   validateReceiverAddresses,
   validateAmounts,
-  splitMultipleInputs,
   calculateTotalAmount,
 } from "@/utils";
 import {
@@ -23,7 +23,7 @@ export function useAirdropForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     getValues,
     watch,
   } = useForm<FormInputs>();
@@ -39,7 +39,8 @@ export function useAirdropForm() {
     [watchedAmounts]
   );
 
-  const isFormDisabled = Object.keys(errors).length > 0 || isPending;
+  const isFormDisabled =
+    Object.keys(errors).length > 0 || isPending || isSubmitting;
 
   const erc20Contract = useMemo(
     () => new ERC20ContractServices(config, writeContractAsync),
@@ -73,63 +74,51 @@ export function useAirdropForm() {
       );
       return;
     }
-    // --- Step 1: Check Allowance ---
-    let approvedAmount;
     try {
-      approvedAmount = await erc20Contract.checkAllowance(
+      // --- Step 1: Check Allowance ---
+      const approvedAmount = await erc20Contract.checkAllowance(
         tSenderAddress,
         tokenAddress,
         connectedAccount.address
       );
-    } catch (error) {
-      console.error("Error during submission process:", error);
-      toast.error(
-        "An error occurred while fetching allowance. Check the console for details."
-      );
-      return;
-    }
-    if (totalAmount > approvedAmount) {
-      // update allowance if not enough
-      console.log(
-        `Approval needed: Current allowance ${approvedAmount}, required: ${totalAmount}`
-      );
-      try {
+      console.log("Approved allowance:", approvedAmount);
+
+      let isApproved = approvedAmount >= totalAmount;
+
+      if (!isApproved) {
+        console.log(
+          `Not enough allowance. Approved: ${approvedAmount}, Required: ${totalAmount}`
+        );
         const approvalHash = (await erc20Contract.approveTokens(
           tokenAddress,
           tSenderAddress,
           totalAmount
         )) as `0x${string}`;
-        console.log("Approval transaction hash:", approvalHash);
-        // wait for transaction confirmation and receipt
+
+        console.log("Waiting for approval confirmation...");
         const approvalReceipt = await waitForTransactionReceipt(config, {
           hash: approvalHash,
         });
-
-        console.log("Approval confirmed:", approvalReceipt);
-        toast.success(`Approval for ${totalAmount} granted`);
-      } catch (error) {
-        console.error("Error during approval: ", error);
-        toast.error(
-          "An error occurred while fetching approval. Check the console for details"
-        );
+        if (approvalReceipt.status === "success") {
+          console.log(approvalReceipt.status);
+          toast.success(`Approval for ${formatEther(totalAmount)}ETH granted`);
+          isApproved = true;
+        }
       }
-    } else {
-      console.log(`Sufficient allowance: ${approvedAmount}`);
-    }
-    // --- Step 2: Air drop amounts to receivers ---
-    try {
-      console.log("Airdropping the amounts to recepients");
-      const airDropTransactionHash = await tSenderContract.airdrop(
-        tSenderAddress,
-        tokenAddress,
-        recipients,
-        amounts
-      );
+
+      if (isApproved) {
+        console.log("Proceeding with airdrop...");
+        const airDropTransactionHash = await tSenderContract.airdrop(
+          tSenderAddress,
+          tokenAddress,
+          recipients,
+          amounts
+        );
+        toast.success(`Airdrop sent! Tx hash:`);
+      }
     } catch (error) {
-      console.error(error);
-      toast.error(
-        "An error occurred while fetching approval. Check the console for details"
-      );
+      console.error("Error during submission:", error);
+      toast.error("Submission failed. See console for details.");
     }
   }
 
@@ -138,6 +127,7 @@ export function useAirdropForm() {
     handleSubmit,
     errors,
     getValues,
+    isSubmitting,
     onSubmit,
     isFormDisabled,
     validateReceiverAddresses: (value: string) =>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "./Providers";
 import Header from "@/components/ui/Header";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,6 +18,38 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Providers>
+          <Toaster
+            position="top-center"
+            gutter={12}
+            containerStyle={{ margin: "8px" }}
+            toastOptions={{
+              duration: 4000, // default for all toasts
+              style: {
+                fontSize: "15px",
+                maxWidth: "480px",
+                padding: "14px 20px",
+                backgroundColor: "#ffffff",
+                color: "#333333",
+                border: "1px solid #e0e0e0",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.06)",
+                borderRadius: "10px",
+              },
+              success: {
+                duration: 7000,
+                iconTheme: {
+                  primary: "#22c55e", // Tailwind green-500
+                  secondary: "#e8f5e9",
+                },
+              },
+              error: {
+                duration: 7000,
+                iconTheme: {
+                  primary: "#ef4444", // Tailwind red-500
+                  secondary: "#fdecea",
+                },
+              },
+            }}
+          />
           <Header />
           {children}
         </Providers>

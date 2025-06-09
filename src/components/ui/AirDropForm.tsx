@@ -15,6 +15,7 @@ export default function AirDropForm() {
     isFormDisabled,
     validateReceiverAddresses,
     validateAmounts,
+    isSubmitting,
   } = useAirdropForm();
 
   return (
@@ -50,7 +51,7 @@ export default function AirDropForm() {
           validate: validateAmounts,
         })}
       />
-      <SendButton disabled={isFormDisabled} />
+      <SendButton disabled={isFormDisabled} isSubmitting={isSubmitting} />
     </form>
   );
 }

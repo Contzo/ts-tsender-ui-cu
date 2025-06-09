@@ -33,6 +33,8 @@ export const validateAmounts = (value: string, getRecipients: () => string) => {
   }
 
   const addresses = splitMultipleInputs(getRecipients());
+  console.log(addresses.length);
+  console.log(amounts.length);
   if (amounts.length !== addresses.length) {
     return "Each recipient should have its own token amount";
   }
