@@ -42,6 +42,9 @@ export class ERC20ContractServices {
     spenderAddress: `0x${string}`,
     amount: bigint
   ): Promise<string> {
+    console.log("From service, trying to approve: ", amount);
+    console.log("From service, spender: ", spenderAddress);
+    console.log("From service, token: ", tokenAddress);
     try {
       const approvalHash = await this.writeContractAsync({
         abi: erc20Abi,
