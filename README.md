@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+TSender UI - Modern Token Airdrop Interface 🚀
 
-## Getting Started
+This is a sleek, modern interface for sending token airdrops built with React and TypeScript. It improves upon the original Cyfrin implementation with better form handling, real-time notifications, and scientific notation support. Connect your wallet and start airdropping tokens in seconds!
 
-First, run the development server:
+What's Cool About This Version? ✨
+Smart Form Handling: Uses react-hook-form for smooth form validation and error messages
 
-```bash
+Scientific Notation: Enter amounts like 1e18 instead of typing 18 zeros!
+
+Real-time Updates: Get instant transaction updates with toast notifications
+
+Clean Code: Contract interactions organized in service classes
+
+Multi-chain Support: Works with any EVM chain (just add contract addresses)
+
+Modern UI: Clean, responsive design that works on any device
+
+How to Get Started 🚀
+Clone the repo:
+
+bash
+git clone https://github.com/Contzo/ts-tsender-ui-cu.git
+cd ts-tsender-ui-cu
+Install packages:
+
+bash
+npm install
+
+# or
+
+yarn install
+Start the dev server:
+
+bash
 npm run dev
+
 # or
+
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Open your browser to http://localhost:3000
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+How to Use It 📝
+Connect your wallet (MetaMask works best)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Enter your token's contract address
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Add recipient addresses (separate with commas or new lines)
 
-## Learn More
+Enter amounts in wei (use 1e18 for 1 token with 18 decimals)
 
-To learn more about Next.js, take a look at the following resources:
+Approve token spending (first transaction)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Send your airdrop (second transaction)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Tech Under the Hood ⚙️
+Frontend: Next.js 14 (App Router)
 
-## Deploy on Vercel
+Styling: Tailwind CSS
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Forms: React Hook Form
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Blockchain: Wagmi + Viem
+
+Notifications: React Hot Toast
+
+Testing: Vitest
+
+Shutouts 🙌
+Big thanks to:
+
+The original Cyfrin TSender UI for inspiration
+
+Patrick Collins for awesome Web3 content
+
+The React community for amazing libraries
