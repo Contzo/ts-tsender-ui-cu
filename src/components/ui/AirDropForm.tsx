@@ -5,6 +5,7 @@ import TextAreaElement from "./TextAreaElement";
 import SendButton from "./SendButton";
 
 import { useAirdropForm } from "@/hooks/useAirdropFrom";
+import TransactionDetails from "./TransactionDetails";
 
 export default function AirDropForm() {
   const {
@@ -16,6 +17,8 @@ export default function AirDropForm() {
     validateReceiverAddresses,
     validateAmounts,
     isSubmitting,
+    totalAmount,
+    tokenName,
   } = useAirdropForm();
 
   return (
@@ -32,6 +35,7 @@ export default function AirDropForm() {
         })}
         error={errors.tokenAddress?.message}
         placeholder="0x"
+        disabled={isSubmitting}
       />
       <TextAreaElement
         label="Recipients (comma or new line separated)"
@@ -41,16 +45,19 @@ export default function AirDropForm() {
           required: "At least one recipient is required",
           validate: validateReceiverAddresses,
         })}
+        disabled={isSubmitting}
       />
       <TextAreaElement
-        label="Amounts (wei; comma or new line separated)"
+        label="Amounts (wei; comma or new line separated, scientific notations allowed E.g. 1e18)"
         placeholder="100, 200, 300"
         error={errors.amounts?.message}
         register={register("amounts", {
           required: "At least one amount is required",
           validate: validateAmounts,
         })}
+        disabled={isSubmitting}
       />
+      <TransactionDetails totalAmount={totalAmount} tokenName={tokenName} />
       <SendButton disabled={isFormDisabled} isSubmitting={isSubmitting} />
     </form>
   );

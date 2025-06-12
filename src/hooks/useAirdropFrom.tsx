@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAccount, useChainId, useConfig, useWriteContract } from "wagmi";
 import toast from "react-hot-toast";
-import { formatEther } from "viem";
+import { formatEther, isAddress } from "viem";
 
 import { FormInputs } from "@/types/airdrop";
 import {
@@ -27,13 +27,13 @@ export function useAirdropForm() {
     getValues,
     watch,
   } = useForm<FormInputs>();
-
   const chainId = useChainId();
   const config = useConfig();
   const connectedAccount = useAccount();
   const { writeContractAsync, isPending } = useWriteContract();
-
   const watchedAmounts = watch("amounts");
+  const watchedTokenAddress = watch("tokenAddress");
+  const [tokenName, setTokenName] = useState("");
   const totalAmount = useMemo(
     () => calculateTotalAmount(watchedAmounts),
     [watchedAmounts]
@@ -51,6 +51,20 @@ export function useAirdropForm() {
     [writeContractAsync]
   );
 
+  useEffect(() => {
+    async function getTokenName() {
+      try {
+        if (isAddress(watchedTokenAddress)) {
+          const name = await erc20Contract.getTokenName(watchedTokenAddress);
+          setTokenName(name);
+        } else setTokenName("");
+      } catch (err) {
+        console.error("Failed to fetch token name:", err);
+        setTokenName("Invalid token address");
+      }
+    }
+    getTokenName();
+  }, [erc20Contract, watchedTokenAddress]);
   async function onSubmit(data: FormInputs) {
     const { tokenAddress, recipients, amounts } = data;
     console.log("Form submitted");
@@ -130,6 +144,8 @@ export function useAirdropForm() {
     isSubmitting,
     onSubmit,
     isFormDisabled,
+    totalAmount,
+    tokenName,
     validateReceiverAddresses: (value: string) =>
       validateReceiverAddresses(value, () => getValues("amounts")),
     validateAmounts: (value: string) =>

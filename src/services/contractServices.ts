@@ -1,5 +1,4 @@
 import { Config } from "wagmi";
-import toast from "react-hot-toast";
 import { erc20Abi, tsenderAbi } from "@/app/constants";
 import { readContract } from "@wagmi/core";
 import { calculateTotalAmount, splitMultipleInputs } from "@/utils";
@@ -29,6 +28,7 @@ export class ERC20ContractServices {
 
       console.log("Raw allowance response:", allowance);
       console.log("Allowance type:", typeof allowance);
+
       // The response from 'allowance' is typically a BigInt
       return allowance as bigint; // Assert type if necessary based on ABI return type
     } catch (error) {
@@ -36,7 +36,20 @@ export class ERC20ContractServices {
       throw errorMessage;
     }
   }
-
+  async getTokenName(erc20TokenAddress: `0x${string}`): Promise<string> {
+    try {
+      const tokenName = await readContract(this.config, {
+        abi: erc20Abi,
+        address: erc20TokenAddress,
+        functionName: "name",
+      });
+      console.log("Token name: ", tokenName);
+      return tokenName;
+    } catch (error) {
+      const errorMessage = this.extractErrorMessage(error);
+      throw errorMessage;
+    }
+  }
   async approveTokens(
     tokenAddress: `0x${string}`,
     spenderAddress: `0x${string}`,

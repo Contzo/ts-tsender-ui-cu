@@ -24,8 +24,16 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-@layer base {
-  button:disabled {
-    cursor: not-allowed;
-  }
+button {
+  cursor: pointer;
+}
+
+*:disabled {
+  cursor: not-allowed;
+}
+
+textarea:disabled,
+input:disabled {
+  background-color: var(--color-grey-200);
+  color: var(--color-grey-500);
 }
