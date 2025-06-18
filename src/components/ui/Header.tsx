@@ -1,6 +1,5 @@
 "use client";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useState, useEffect, type ReactNode } from "react";
 import { FaGithub } from "react-icons/fa";
 
 export default function Header() {

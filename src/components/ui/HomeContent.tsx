@@ -1,4 +1,3 @@
-import AirDropForm from "./AirDropForm";
 import dynamic from "next/dynamic";
 import { useAccount } from "wagmi";
 
@@ -9,6 +8,8 @@ const SafeAirDropForm = dynamic(() => import("@/components/ui/AirDropForm"), {
 export default function HomeContent() {
   const { isConnected } = useAccount();
   return (
-    <>{!isConnected ? <div>Please connect a wallet</div> : <AirDropForm />}</>
+    <>
+      {!isConnected ? <div>Please connect a wallet</div> : <SafeAirDropForm />}
+    </>
   );
 }

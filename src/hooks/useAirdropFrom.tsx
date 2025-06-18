@@ -128,6 +128,7 @@ export function useAirdropForm() {
           recipients,
           amounts
         );
+        console.log("Airdrop transaction hash: ", airDropTransactionHash);
         toast.success(`Airdrop sent! Tx hash:`);
       }
     } catch (error) {

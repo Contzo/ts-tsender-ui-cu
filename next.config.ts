@@ -2,6 +2,14 @@ import type { NextConfig } from "next";
 import type { Configuration } from "webpack";
 
 const nextConfig: NextConfig = {
+  output: "export",
+  distDir: "out",
+  images: {
+    unoptimized: true,
+  },
+  basePath: "",
+  assetPrefix: "./",
+  trailingSlash: true,
   webpack: (
     config: Configuration,
     { isServer, dev }: { isServer: boolean; dev: boolean }

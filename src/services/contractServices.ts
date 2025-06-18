@@ -3,7 +3,7 @@ import { erc20Abi, tsenderAbi } from "@/app/constants";
 import { readContract } from "@wagmi/core";
 import { calculateTotalAmount, splitMultipleInputs } from "@/utils";
 import { scientificNotationToBigInt } from "../utils/helpers";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export class ERC20ContractServices {
   constructor(private config: Config, private writeContractAsync: any) {}
 
@@ -71,7 +71,7 @@ export class ERC20ContractServices {
       console.error("Approval failed:", error);
 
       const errorMessage = this.extractErrorMessage(error);
-      throw error;
+      throw errorMessage;
     }
   }
 
