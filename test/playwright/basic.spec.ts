@@ -4,10 +4,9 @@ import { MetaMask, metaMaskFixtures } from "@synthetixio/synpress/playwright";
 
 const test = testWithSynpress(metaMaskFixtures(basicSetup));
 const { expect } = test;
+
 test("has title", async ({ page }) => {
   await page.goto("/");
-
-  // Expect a title "to contain" a substring.
   await expect(page).toHaveTitle(/TSender/);
 });
 
@@ -18,22 +17,38 @@ test("should show the airdrop form when connected, otherwise, not", async ({
   extensionId,
 }) => {
   await page.goto("/");
-  // check we see "please connect wallet"
+  
+  // Check we see "please connect wallet"
   await expect(page.getByText("Please connect a wallet")).toBeVisible();
+  
   const metamask = new MetaMask(
-    context, // browser context
-    metamaskPage, // the separate Metamask tab
-    basicSetup.walletPassword, // the passowod for our test wallet.
-    extensionId // the unique chrome extension id of MetaMask
+    context,
+    metamaskPage,
+    basicSetup.walletPassword,
+    extensionId
   );
+
+  // Connect to dapp first
   await page.getByTestId("rk-connect-button").click();
-  // wait for the connect pop up to be visible.
+  
+  // Wait for MetaMask option
   await page.getByTestId("rk-wallet-option-io.metamask").waitFor({
     state: "visible",
-    timeout: 30000, // waits up to 30sec for the pop-up to be visible
+    timeout: 30000,
   });
+  
   await page.getByTestId("rk-wallet-option-io.metamask").click();
+  
+  // Wait for connection to complete
   await metamask.connectToDapp();
+  
+  // Verify page is still active after connection
+  await expect(page.getByText("Please connect a wallet")).not.toBeVisible();
+  
+  // Ensure both contexts are still alive before network operations
+  if (page.isClosed() || metamaskPage.isClosed()) {
+    throw new Error("Page context was closed during connection");
+  }
 
   const customNetwork = {
     name: "Anvil",
@@ -42,7 +57,9 @@ test("should show the airdrop form when connected, otherwise, not", async ({
     symbol: "ETH",
   };
 
+  // Add network - let it fail cleanly if context is closed
   await metamask.addNetwork(customNetwork);
-  // check if the airdrop form is vible by seaching for one of its input field names
+  
+  // Check if the airdrop form is visible
   await expect(page.getByText("Token Address")).toBeVisible();
 });

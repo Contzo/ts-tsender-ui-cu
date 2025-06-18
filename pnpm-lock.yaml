@@ -26,6 +26,9 @@ importers:
       pino-pretty:
         specifier: ^13.0.0
         version: 13.0.0
+      playwright:
+        specifier: ^1.53.0
+        version: 1.53.0
       react:
         specifier: ^19.0.0
         version: 19.1.0
